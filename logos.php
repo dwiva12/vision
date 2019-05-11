@@ -5,9 +5,9 @@
                 <?php foreach ($logos as $key => $logo): ?>
                     <li>
                         <h6>
-                            <?php echo ucfirst($logo->info()['description']) ?>
+                            <?php echo ucfirst($logo->getDescription()) ?>
                         </h6>
-                        Confidence: <strong><?php echo number_format($logo->info()['score'] * 100 , 2) ?></strong>
+                        Confidence: <strong><?php echo number_format($logo->getScore() * 100 , 2) ?></strong>
                         <br><br>
                     </li>
                 <?php endforeach ?>

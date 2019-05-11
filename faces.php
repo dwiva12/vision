@@ -3,67 +3,65 @@
         <ol>
             <?php if ($faces): ?>
                 <?php foreach ($faces as $key => $face): ?>
-                    <?php 
+                    <?php
                         // Assiging Colours to each face
                         $faceColorR = random_int(0, 200);
                         $faceColorG = random_int(0, 200);
                         $faceColorB = random_int(0, 200);
                         $color = [$faceColorR, $faceColorG , $faceColorB];
-                        $_SESSION['faces'][$imagetoken][$key] = json_encode($face->info()['landmarks']);
+                        $_SESSION['faces'][$imagetoken][$key] = json_encode($face->getLandmarks());
                         $_SESSION['faces']['colors'][$key] = $color;
 
                      ?>
-                    <br><br>                    
                     <li>
                         <strong style="color: rgb(<?php echo "$faceColorR, $faceColorG, $faceColorB"; ?>);">Face <?php echo $key + 1 ?></strong>
-                        <hr>
-
+                        <hr style="border: 1px solid grey;">
                         <div class="row">
                             <div class="col-6">
-                                <strong>Joy</strong>
+                                <strong>Gembira</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->info()['joyLikelihood'] ?></strong>
+                                <strong><?php echo $face->getJoyLikelihood() ?></strong>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <strong>Sorrow</strong>
+                                <strong>Sedih</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->info()['sorrowLikelihood'] ?></strong>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <strong>Angry</strong>
-                            </div>
-                            <div class="col-6">
-                                <strong><?php echo $face->info()['angerLikelihood'] ?></strong>
+                                <strong><?php echo $face->getSorrowLikelihood() ?></strong>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <strong>Surprised</strong>
+                                <strong>Marah</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->info()['surpriseLikelihood'] ?></strong>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-6">
-                                <strong>Blurred</strong>
-                            </div>
-                            <div class="col-6">
-                                <strong><?php echo $face->info()['blurredLikelihood'] ?></strong>
+                                <strong><?php echo $face->getAngerLikelihood() ?></strong>
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-6">
-                                <strong>Headwear</strong>
+                                <strong>Terkejut</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->info()['headwearLikelihood'] ?></strong>
+                                <strong><?php echo $face->getSurpriseLikelihood() ?></strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <strong>Gambar Kabur</strong>
+                            </div>
+                            <div class="col-6">
+                                <strong><?php echo $face->getBlurredLikelihood() ?></strong>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <strong>Penutup Kepala</strong>
+                            </div>
+                            <div class="col-6">
+                                <strong><?php echo $face->getHeadwearLikelihood() ?></strong>
                             </div>
                         </div>
                     </li>

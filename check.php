@@ -5,22 +5,29 @@ session_start();
 require "vendor/autoload.php";
 
 
-use Google\Cloud\Vision\VisionClient;
-$vision = new VisionClient(['keyFile' => json_decode(file_get_contents("key1.json"), true)]);
+use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\Feature;
+use Google\Cloud\Vision\V1\Feature\Type;
+use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
 
-$familyPhotoResource = fopen($_FILES['image']['tmp_name'], 'r');
+putenv("GOOGLE_APPLICATION_CREDENTIALS=" . getcwd() . "/key1.json");
+$imageAnnotator = new ImageAnnotatorClient();
 
-$image = $vision->image($familyPhotoResource,
-    ['LABEL_DETECTION',
-     /*'WEB_DETECTION',
-     'LABEL_DETECTION',
-     'IMAGE_PROPERTIES',
-     'SAFE_SEARCH_DETECTION',
-     'LANDMARK_DETECTION',
-     'LOGO_DETECTION',*/
-     'OBJECT_LOCALIZATION'
-    ]);
-$result = $vision->annotate($image);
+$imageResource = fopen($_FILES['image']['tmp_name'], 'r');
+
+$features = [
+    TYPE::OBJECT_LOCALIZATION,
+    TYPE::LABEL_DETECTION,
+    TYPE::WEB_DETECTION,
+    TYPE::FACE_DETECTION,
+    TYPE::LANDMARK_DETECTION,
+    TYPE::LOGO_DETECTION,
+    TYPE::IMAGE_PROPERTIES,
+    TYPE::SAFE_SEARCH_DETECTION
+    // TYPE::TEXT_DETECTION
+];
+
+$result = $imageAnnotator->annotateImage($imageResource, $features);
 
 if ($result) {
     $imagetoken = random_int(1111111, 999999999);
@@ -30,29 +37,15 @@ if ($result) {
     die();
 }
 
-$faces = $result->faces();
-$logos = $result->logos();
-$labels = $result->labels();
-$text = $result->text();
-$fullText = $result->fullText();
-$properties = $result->imageProperties();
-$cropHints = $result->cropHints();
-$web = $result->web();
-$safeSearch = $result->safeSearch();
-$landmarks = $result->landmarks();
-
-
-$temp = [];
-$index = 0;
-foreach ($labels as $key => $label) {
-    $temp[$index] = array(
-        'label' => $label->info()['description'],
-        'confidence' => number_format($label->info()['score'] * 100 , 2)
-    );
-    $index++;
-}
-// echo json_encode($temp);
-print_r($result);
+$objects = $result->getLocalizedObjectAnnotations();
+$labels = $result->getLabelAnnotations();
+$web = $result->getWebDetection();
+$textAnnotation = $result->getFullTextAnnotation();
+$faces = $result->getFaceAnnotations();
+$landmarks = $result->getLandmarkAnnotations();
+$safeSearch = $result->getSafeSearchAnnotation();
+$logos = $result->getLogoAnnotations();
+$properties = $result->getImagePropertiesAnnotation();
 
 ?>
 <!DOCTYPE html>
@@ -69,11 +62,10 @@ print_r($result);
             height: 100%;
         }
         .bg {
-            /*background-image: url("images/bg.jpg");*/
-            background-color: #f0f0f0;
+            background-image: url("images/bg.jpg");
             height: 100%;
             /*background-position: center;*/
-            background-repeat: no-repeat;
+            background-repeat: repeat; background-attachment: fixed;
             /*background-size: cover;*/
         }
         .container-fluid  {
@@ -85,27 +77,30 @@ print_r($result);
     <div class="container-fluid" style="max-width: 1080px;">
         <br><br><br>
         <div class="row">
-            <div class="col-md-12" style="margin: auto; background: white; padding: 20px; box-shadow: 10px 10px 5px #0003">
+            <div class="col-md-12" style="margin: auto; background: #c9d8d3; padding: 20px; box-shadow: 10px 10px 5px #888; border-radius: 5px;">
                 <div class="panel-heading">
-                    <h2><a href="/">Google Cloud Vision API</a></h2>
-                    <!--<p style="font-style: italic;">Coolest Image Processing Engine on Earth</p>-->
+                    <h2><a href="/">Medical Vision</a></h2>
+                    <p style="font-style: italic;">Image Analyse Result</p>
                 </div>
-                <hr>
+                <hr style="border: 1px solid grey;">
                 <div class="row">
                     <div class="col-md-4" style="text-align: center;">
                         <img class="img-thumbnail" src="<?php
                             if ($faces == null) {
                                 echo "feed/" . $imagetoken . ".jpg";
                             } else {
-                                echo "image.php?token=$imagetoken";
+                                echo "object_image.php?token=$imagetoken";
                             }
                         ?>" alt="Analysed Image">
 
                     </div>
-                    <div class="col-md-8 border" style="padding: 10px;">
+                    <div class="col-md-8" style="padding: 10px; border: 2px solid grey;">
                         <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
                             <li class="nav-item">
-                                <a href="#pills-face" role="tab" class="nav-link active" id="pills-face-tab" data-toggle="pill" aria-controls="pills-face" aria-selected="true">Faces</a>
+                                <a href="#pills-face" role="tab" class="nav-link active" id="pills-face-tab" data-toggle="pill" aria-controls="pills-face" aria-selected="true">Face</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="#pills-object" role="tab" class="nav-link" id="pills-object-tab" data-toggle="pill" aria-controls="pills-object" aria-selected="true">Object</a>
                             </li>
                             <li class="nav-item">
                                 <a href="#pills-labels" role="tab" class="nav-link" id="pills-labels-tab" data-toggle="pill" aria-controls="pills-labels" aria-selected="true">Labels</a>
@@ -116,9 +111,9 @@ print_r($result);
                             <li class="nav-item">
                                 <a href="#pills-properties" role="tab" class="nav-link" id="pills-properties-tab" data-toggle="pill" aria-controls="pills-properties" aria-selected="true">Properties</a>
                             </li>
-                            <li class="nav-item">
+                            <!-- <li class="nav-item">
                                 <a href="#pills-safesearch" role="tab" class="nav-link" id="pills-safesearch-tab" data-toggle="pill" aria-controls="pills-safesearch" aria-selected="true">Safe Search</a>
-                            </li>
+                            </li> -->
                             <li class="nav-item">
                                 <a href="#pills-landmarks" role="tab" class="nav-link" id="pills-landmarks-tab" data-toggle="pill" aria-controls="pills-landmarks" aria-selected="true">Landmarks</a>
                             </li>
@@ -126,13 +121,21 @@ print_r($result);
                                 <a href="#pills-logo" role="tab" class="nav-link" id="pills-logo-tab" data-toggle="pill" aria-controls="pills-logo" aria-selected="true">Logos</a>
                             </li>
                         </ul>
-                        <hr>
+                        <hr style="border: 1px solid grey;">
                         <div class="tab-content" id="pills-tabContent">
 
                             <div class="tab-pane fade show active" id="pills-face" role="tabpanel" aria-labelledby="pills-face-tab">
                                 <div class="row">
                                     <div class="col-12">
                                         <?php include "faces.php" ;?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade show" id="pills-object" role="tabpanel" aria-labelledby="pills-object-tab">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <?php include "objects.php" ;?>
                                     </div>
                                 </div>
                             </div>
@@ -161,13 +164,13 @@ print_r($result);
                                 </div>
                             </div>
 
-                            <div class="tab-pane fade show" id="pills-safesearch" role="tabpanel" aria-labelledby="pills-safesearch-tab">
+                            <!-- <div class="tab-pane fade show" id="pills-safesearch" role="tabpanel" aria-labelledby="pills-safesearch-tab">
                                 <div class="row">
                                     <div class="col-12">
-                                        <?php include "safesearch.php" ;?>
+                                        <?php //include "safesearch.php" ;?>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <div class="tab-pane fade show" id="pills-landmarks" role="tabpanel" aria-labelledby="pills-landmarks-tab">
                                 <div class="row">

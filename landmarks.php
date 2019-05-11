@@ -3,7 +3,7 @@
         <ol>
             <?php if ($landmarks): ?>
                 <?php foreach ($landmarks as $key => $landmark): ?>
-                    <li><h6><?php echo ucfirst($landmark->info()['description']) ?></h6> Confidence: <strong><?php echo number_format($landmark->info()['score']*100, 2) ?></strong><br><br></li>
+                    <li><h6><?php echo ucfirst($landmark->getDescription()) ?></h6> Confidence: <strong><?php echo number_format($landmark->getScore()*100, 2) ?></strong><br><br></li>
                 <?php endforeach ?>
             <?php endif ?>
         </ol>
