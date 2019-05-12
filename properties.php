@@ -1,14 +1,13 @@
 <div class="row">
     <div class="col-12">
         <ol>
-            <?php if ($faces): ?>
-            <?php foreach ($properties->getDominantColors() as $key => $dominantColors): ?>
-                <?php foreach ($dominantColors as $key => $dominantColor): ?>
-                    <?php
+            <?php if ($properties):
+                $dominantColors = $properties->getDominantColors();
+                foreach ($dominantColors->getColors() as $key => $color):
                         // Preparing Values
-                        $rgb = $dominantColor->getColor();
-                        $score = $dominantColor->getScore();
-                        $pixelFraction = $dominantColor->getPixelFraction();
+                        $rgb = $color->getColor();
+                        $score = $color->getScore();
+                        $pixelFraction = $color->getPixelFraction();
                     ?>
                     <li>
                         <strong>
@@ -23,7 +22,6 @@
                         <strong>Pixel Fraction: </strong><?php echo $pixelFraction ?>
                     </li>
                 <?php endforeach ?>
-            <?php endforeach ?>
             <?php endif ?>
         </ol>
     </div>

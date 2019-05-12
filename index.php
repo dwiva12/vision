@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Google Medical Vision</title>
+    <title>Medical Vision</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <style>
         body, html {
@@ -43,7 +43,7 @@
                 <form action="check.php" method="post" enctype="multipart/form-data">
                     <input type="file" name="image" accept="image/*" class="form-control" onchange="loadFile(event)">
                     <br>
-                    <img id="output" width="300" height="300" class="center"/>
+                    <img id="output" width="300" class="center"/>
                     <br>
                     <script>
                         var loadFile = function(event) {

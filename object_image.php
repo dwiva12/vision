@@ -12,23 +12,23 @@ foreach ($objects as $key => $object) {
     $objectColorG = $_SESSION['objects']['colors'][$key][1];
     $objectColorB = $_SESSION['objects']['colors'][$key][2];
 
-    $vertex = json_decode($object);
+    $vertices = json_decode($object);
         // for ($i=0; $i < 5; $i++) {
         //     for ($j=0; $j < 5; $j++) {
-        //         imagesetpixel($image, round($vertex->x), round($vertex->y), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertex->x - random_int(1, 5)) , round($vertex->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertex->x + random_int(1, 5)) , round($vertex->y + random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertex->x + random_int(1, 5)) , round($vertex->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertex->x - random_int(1, 5)) , round($vertex->y + random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertex->x - random_int(1, 5)) , round($vertex->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
+        //         imagesetpixel($image, round($vertices->x), round($vertices->y), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
+        //         imagesetpixel($image, round($vertices->x - random_int(1, 5)) , round($vertices->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
+        //         imagesetpixel($image, round($vertices->x + random_int(1, 5)) , round($vertices->y + random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
+        //         imagesetpixel($image, round($vertices->x + random_int(1, 5)) , round($vertices->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
+        //         imagesetpixel($image, round($vertices->x - random_int(1, 5)) , round($vertices->y + random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
+        //         imagesetpixel($image, round($vertices->x - random_int(1, 5)) , round($vertices->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
         //     }
         // }
     imagesetthickness($image, round(0.004 * $width));
     imagerectangle($image,
-        round($vertex->left * $width),
-        round($vertex->top * $height),
-        round($vertex->right * $width),
-        round($vertex->bottom * $height),
+        round($vertices->left * $width),
+        round($vertices->top * $height),
+        round($vertices->right * $width),
+        round($vertices->bottom * $height),
         imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
 }
 

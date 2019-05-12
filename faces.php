@@ -1,3 +1,6 @@
+<?php
+use Google\Cloud\Vision\V1\FaceAnnotation\Landmark\Type;
+use Google\Cloud\Vision\V1\Likelihood; ?>
 <div class="row">
     <div class="col-12">
         <ol>
@@ -9,7 +12,39 @@
                         $faceColorG = random_int(0, 200);
                         $faceColorB = random_int(0, 200);
                         $color = [$faceColorR, $faceColorG , $faceColorB];
-                        $_SESSION['faces'][$imagetoken][$key] = json_encode($face->getLandmarks());
+
+                        $faceMark = [];
+                        $normalizedVertices = $face->getBoundingPoly()->getVertices();
+                        $vertices = [
+                            'left' => number_format($normalizedVertices[0]->getX(), 8),
+                            'top' => number_format($normalizedVertices[0]->getY(), 8),
+                            'right' => number_format($normalizedVertices[2]->getX(), 8),
+                            'bottom' => number_format($normalizedVertices[2]->getY(), 8)
+                        ];
+
+                        $landmarkPos = [];
+                        foreach ($face->getLandmarks() as $key1 => $landmark) {
+                            switch ($landmark->getType()) {
+                                case TYPE::LEFT_EYE:
+                                case TYPE::RIGHT_EYE:
+                                case TYPE::UPPER_LIP:
+                                case TYPE::LOWER_LIP:
+                                $landmarkPos[$key1] = [
+                                        'x' => $landmark->getPosition()->getX(),
+                                        'y' => $landmark->getPosition()->getY()
+                                    ];
+                                    break;
+                                default:
+                                    // code...
+                                    break;
+                            }
+                        }
+
+                        $faceMark = [
+                            'vertices' => $vertices,
+                            'landmarks' => $landmarkPos
+                        ];
+                        $_SESSION['faces'][$imagetoken][$key] = json_encode($faceMark);
                         $_SESSION['faces']['colors'][$key] = $color;
 
                      ?>
@@ -21,7 +56,7 @@
                                 <strong>Gembira</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->getJoyLikelihood() ?></strong>
+                                <strong><?php echo Likelihood::name($face->getJoyLikelihood()) ?></strong>
                             </div>
                         </div>
                         <div class="row">
@@ -29,7 +64,7 @@
                                 <strong>Sedih</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->getSorrowLikelihood() ?></strong>
+                                <strong><?php echo Likelihood::name($face->getSorrowLikelihood()) ?></strong>
                             </div>
                         </div>
                         <div class="row">
@@ -37,7 +72,7 @@
                                 <strong>Marah</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->getAngerLikelihood() ?></strong>
+                                <strong><?php echo Likelihood::name($face->getAngerLikelihood()) ?></strong>
                             </div>
                         </div>
                         <div class="row">
@@ -45,7 +80,7 @@
                                 <strong>Terkejut</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->getSurpriseLikelihood() ?></strong>
+                                <strong><?php echo Likelihood::name($face->getSurpriseLikelihood()) ?></strong>
                             </div>
                         </div>
                         <div class="row">
@@ -53,7 +88,7 @@
                                 <strong>Gambar Kabur</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->getBlurredLikelihood() ?></strong>
+                                <strong><?php echo Likelihood::name($face->getBlurredLikelihood()) ?></strong>
                             </div>
                         </div>
                         <div class="row">
@@ -61,7 +96,7 @@
                                 <strong>Penutup Kepala</strong>
                             </div>
                             <div class="col-6">
-                                <strong><?php echo $face->getHeadwearLikelihood() ?></strong>
+                                <strong><?php echo Likelihood::name($face->getHeadwearLikelihood()) ?></strong>
                             </div>
                         </div>
                     </li>

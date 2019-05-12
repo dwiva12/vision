@@ -52,7 +52,7 @@ $properties = $result->getImagePropertiesAnnotation();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Google Cloud Vision API</title>
+    <title>Medical Vision</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
@@ -87,11 +87,11 @@ $properties = $result->getImagePropertiesAnnotation();
                     <div class="col-md-4" style="text-align: center;">
                         <img class="img-thumbnail" src="<?php
                             if ($faces == null) {
-                                echo "feed/" . $imagetoken . ".jpg";
+                                echo "http://localhost/vision/feed/" . $imagetoken . ".jpg";
                             } else {
-                                echo "object_image.php?token=$imagetoken";
+                                echo "http://localhost/vision/image.php?token=$imagetoken";
                             }
-                        ?>" alt="Analysed Image">
+                        ?>" alt="Analysed Image" id="analysedImage" onclick="changeImage()">
 
                     </div>
                     <div class="col-md-8" style="padding: 10px; border: 2px solid grey;">
@@ -187,7 +187,6 @@ $properties = $result->getImagePropertiesAnnotation();
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -195,4 +194,33 @@ $properties = $result->getImagePropertiesAnnotation();
         </div>
     </div>
 </body>
+<footer>
+    <script language="javascript">
+        // function changeImage() {
+        //
+        //     if (document.getElementById("analysedImage").src == "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>") {
+        //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/object_image.php?token=$imagetoken";?>";
+        //     } else {
+        //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>";
+        //     }
+        // }
+        $('#pills-tab').children().each(function() {
+            $(this).on('click', function() {
+                // $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
+                var target = $(this).find('.nav-link').attr('href');
+                switch (target) {
+                    case '#pills-face':
+                        $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/image.php?token=$imagetoken";?>');
+                        break;
+                    case '#pills-object':
+                        $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
+                        break;
+                    default:
+                        $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/feed/" . $imagetoken . ".jpg";?>');
+                        break;
+                }
+            });
+        });
+    </script>
+</footer>
 </html>

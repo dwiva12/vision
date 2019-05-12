@@ -2,28 +2,38 @@
 
 session_start();
 
+$imageCreateFunc = [
+    'png' => 'imagecreatefrompng',
+    'gd' => 'imagecreatefromgd',
+    'gif' => 'imagecreatefromgif',
+    'jpg' => 'imagecreatefromjpeg',
+    'jpeg' => 'imagecreatefromjpeg'
+];
+
 $imagetoken = $_GET['token'];
-$faces = $_SESSION['faces'][$imagetoken];
-$image = imagecreatefromjpeg("feed/". $imagetoken . ".jpg");
+$path = "feed/". $imagetoken . ".jpg";
+$ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+$faces = json_decode(json_encode($_SESSION['faces'][$imagetoken]));
+// $image = imagecreatefromjpeg("feed/". $imagetoken . ".jpg");
+$image = call_user_func($imageCreateFunc[$ext], $path);
+list($width, $height) = getimagesize("feed/" . $imagetoken . ".jpg");
 
 foreach ($faces as $key => $face) {
     $faceColorR = $_SESSION['faces']['colors'][$key][0];
     $faceColorG = $_SESSION['faces']['colors'][$key][1];
     $faceColorB = $_SESSION['faces']['colors'][$key][2];
 
-    foreach ($face->getBoundingPoly()->getVertices() as $vertex) {
-        for ($i=0; $i < 5; $i++) {
-            for ($j=0; $j < 5; $j++) {
-                imagesetpixel($image, round($vertex->getX()), round($vertex->getY()), imagecolorallocate($image, $faceColorR, $faceColorG, $faceColorB));
-                imagesetpixel($image, round($vertex->getX() - random_int(1, 5)) , round($vertex->getY() - random_int(1, 5)), imagecolorallocate($image, $faceColorR, $faceColorG, $faceColorB));
-                imagesetpixel($image, round($vertex->getX() + random_int(1, 5)) , round($vertex->getY() + random_int(1, 5)), imagecolorallocate($image, $faceColorR, $faceColorG, $faceColorB));
-                imagesetpixel($image, round($vertex->getX() + random_int(1, 5)) , round($vertex->getY() - random_int(1, 5)), imagecolorallocate($image, $faceColorR, $faceColorG, $faceColorB));
-                imagesetpixel($image, round($vertex->getX() - random_int(1, 5)) , round($vertex->getY() + random_int(1, 5)), imagecolorallocate($image, $faceColorR, $faceColorG, $faceColorB));
-                imagesetpixel($image, round($vertex->getX() - random_int(1, 5)) , round($vertex->getY() - random_int(1, 5)), imagecolorallocate($image, $faceColorR, $faceColorG, $faceColorB));
-            }
-        }
-    }
+    $faceMark = json_decode($face);
+    $vertices = $faceMark->vertices;
+
+    imagesetthickness($image, round(0.004 * $width));
+    imagerectangle($image,
+        round($vertices->left),
+        round($vertices->top),
+        round($vertices->right),
+        round($vertices->bottom),
+        imagecolorallocate($image, $faceColorR, $faceColorG, $faceColorB));
 }
 
-// header("Content-Type: image/png");
-// imagejpeg($image);
+header("Content-Type: image/png");
+imagejpeg($image);
