@@ -25,7 +25,14 @@ $result = $imageAnnotator->annotateImage($imageResource, $features);
 
 if ($result) {
     $imagetoken = random_int(1111111, 999999999);
-    move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . ".jpg");
+    $imageType = [
+        IMAGETYPE_JPEG => 'jpg',
+        IMAGETYPE_PNG => 'png',
+        IMAGETYPE_GIF => 'gif'
+    ];
+    $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
+    move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
+    $_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
 } else {
     header("location: index.php");
     die();
@@ -113,8 +120,8 @@ if ($web != null) {
     }
 
     $webData = [
-        'entities' => $webEntities,
-        'fullMachingImages' => $webFullMatchingImages,
+        'webEntities' => $webEntities,
+        'fullMacthingImages' => $webFullMatchingImages,
         'partialMatchingImages' => $webPartialMatchingImages,
         'visuallySimilarImages' => $webVisuallySimilarImages,
         'pages' => $webPagesWithMatchingImages,
@@ -180,7 +187,7 @@ $visionData = [
     'objects' => $objectsData,
     'labels' => $labelsData,
     'web' => $webData,
-    'text' => $textData
+    'textAnnotation' => $textData
 ];
 
 header('Content-Type: application/json');

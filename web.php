@@ -1,11 +1,19 @@
 <div class="row">
     <?php if ($web): ?>
     <div class="col-6">
+        <h5>Best Guess Labels</h5>
+        <hr style="border: 1px solid grey;">
+        <ol>
+            <?php foreach ($web->getBestGuessLabels() as $key => $label): ?>
+                <li><h6><strong><?php echo ucfirst($label->getLabel()); ?></strong></h6> Language Code: <strong><?php echo $label->getLanguageCode(); ?></strong></li>
+            <?php endforeach ?>
+        </ol>
+        <hr><hr>
         <h5>Entities</h5>
         <hr style="border: 1px solid grey;">
         <ol>
             <?php foreach ($web->getWebEntities() as $key => $entity): ?>
-                <li><h6><strong><?php echo ucfirst($entity->getDescription()); ?></strong></h6> Score: <strong><?php echo number_format($entity->getScore() * 100 , 2) ?></strong></li>
+                <li><h6><strong><?php echo ucfirst(($entity->getDescription() != '') ? $entity->getDescription() : '<No Description>' ); ?></strong></h6> Score: <strong><?php echo number_format($entity->getScore() * 100 , 2) ?></strong></li>
             <?php endforeach ?>
         </ol>
     </div>

@@ -1,11 +1,20 @@
 <?php
 
 session_start();
+$imageCreateFunc = [
+    'png' => 'imagecreatefrompng',
+    'gd' => 'imagecreatefromgd',
+    'gif' => 'imagecreatefromgif',
+    'jpg' => 'imagecreatefromjpeg',
+    'jpeg' => 'imagecreatefromjpeg'
+];
 
 $imagetoken = $_GET['token'];
+$path = $_SESSION['image_path'];
+$ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 $objects = json_decode(json_encode($_SESSION['objects'][$imagetoken]));
-$image = imagecreatefromjpeg("feed/". $imagetoken . ".jpg");
-list($width, $height) = getimagesize("feed/" . $imagetoken . ".jpg");
+$image = call_user_func($imageCreateFunc[$ext], $path);
+list($width, $height) = getimagesize($path);
 
 foreach ($objects as $key => $object) {
     $objectColorR = $_SESSION['objects']['colors'][$key][0];

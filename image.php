@@ -16,7 +16,7 @@ $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
 $faces = json_decode(json_encode($_SESSION['faces'][$imagetoken]));
 // $image = imagecreatefromjpeg("feed/". $imagetoken . ".jpg");
 $image = call_user_func($imageCreateFunc[$ext], $path);
-list($width, $height) = getimagesize("feed/" . $imagetoken . ".jpg");
+list($width, $height) = getimagesize($path);
 
 foreach ($faces as $key => $face) {
     $faceColorR = $_SESSION['faces']['colors'][$key][0];

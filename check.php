@@ -9,6 +9,7 @@ use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\Feature;
 use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
+use Google\Cloud\Vision\V1\Likelihood;
 
 putenv("GOOGLE_APPLICATION_CREDENTIALS=" . getcwd() . "/key1.json");
 $imageAnnotator = new ImageAnnotatorClient();
@@ -31,7 +32,14 @@ $result = $imageAnnotator->annotateImage($imageResource, $features);
 
 if ($result) {
     $imagetoken = random_int(1111111, 999999999);
-    move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . ".jpg");
+    $imageType = [
+        IMAGETYPE_JPEG => 'jpg',
+        IMAGETYPE_PNG => 'png',
+        IMAGETYPE_GIF => 'gif'
+    ];
+    $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
+    move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
+    $_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
 } else {
     header("location: index.php");
     die();
@@ -86,45 +94,63 @@ $properties = $result->getImagePropertiesAnnotation();
                 <div class="row">
                     <div class="col-md-4" style="text-align: center;">
                         <img class="img-thumbnail" src="<?php
-                            if ($faces == null) {
-                                echo "http://localhost/vision/feed/" . $imagetoken . ".jpg";
-                            } else {
+                            if (sizeof($faces) > 0) {
                                 echo "http://localhost/vision/image.php?token=$imagetoken";
+                            } else if (sizeof($objects) > 0) {
+                                echo "http://localhost/vision/object_image.php?token=$imagetoken";
+                            } else {
+                                echo "http://localhost/vision/feed/" . $imagetoken . "." . $ext;
                             }
                         ?>" alt="Analysed Image" id="analysedImage" onclick="changeImage()">
 
                     </div>
                     <div class="col-md-8" style="padding: 10px; border: 2px solid grey;">
                         <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
+                            <?php if (sizeof($faces) > 0): ?>
                             <li class="nav-item">
-                                <a href="#pills-face" role="tab" class="nav-link active" id="pills-face-tab" data-toggle="pill" aria-controls="pills-face" aria-selected="true">Face</a>
+                                <a href="#pills-face" role="tab" class="nav-link" id="pills-face-tab" data-toggle="pill" aria-controls="pills-face" aria-selected="true">Face</a>
                             </li>
+                            <?php endif ?>
+                            <?php if (sizeof($objects) > 0): ?>
                             <li class="nav-item">
                                 <a href="#pills-object" role="tab" class="nav-link" id="pills-object-tab" data-toggle="pill" aria-controls="pills-object" aria-selected="true">Object</a>
                             </li>
+                            <?php endif ?>
+                            <?php if (sizeof($labels) > 0): ?>
                             <li class="nav-item">
                                 <a href="#pills-labels" role="tab" class="nav-link" id="pills-labels-tab" data-toggle="pill" aria-controls="pills-labels" aria-selected="true">Labels</a>
                             </li>
+                            <?php endif ?>
+                            <?php if ($web): ?>
                             <li class="nav-item">
                                 <a href="#pills-web" role="tab" class="nav-link" id="pills-web-tab" data-toggle="pill" aria-controls="pills-web" aria-selected="true">Web</a>
                             </li>
+                            <?php endif ?>
+                            <?php if ($properties): ?>
                             <li class="nav-item">
                                 <a href="#pills-properties" role="tab" class="nav-link" id="pills-properties-tab" data-toggle="pill" aria-controls="pills-properties" aria-selected="true">Properties</a>
                             </li>
-                            <!-- <li class="nav-item">
+                            <?php endif ?>
+                            <?php if ($safeSearch): ?>
+                            <li class="nav-item">
                                 <a href="#pills-safesearch" role="tab" class="nav-link" id="pills-safesearch-tab" data-toggle="pill" aria-controls="pills-safesearch" aria-selected="true">Safe Search</a>
-                            </li> -->
+                            </li>
+                            <?php endif ?>
+                            <?php if (sizeof($landmarks) > 0): ?>
                             <li class="nav-item">
                                 <a href="#pills-landmarks" role="tab" class="nav-link" id="pills-landmarks-tab" data-toggle="pill" aria-controls="pills-landmarks" aria-selected="true">Landmarks</a>
                             </li>
+                            <?php endif ?>
+                            <?php if (sizeof($logos) > 0): ?>
                             <li class="nav-item">
                                 <a href="#pills-logo" role="tab" class="nav-link" id="pills-logo-tab" data-toggle="pill" aria-controls="pills-logo" aria-selected="true">Logos</a>
                             </li>
+                            <?php endif ?>
                         </ul>
                         <hr style="border: 1px solid grey;">
                         <div class="tab-content" id="pills-tabContent">
 
-                            <div class="tab-pane fade show active" id="pills-face" role="tabpanel" aria-labelledby="pills-face-tab">
+                            <div class="tab-pane fade show" id="pills-face" role="tabpanel" aria-labelledby="pills-face-tab">
                                 <div class="row">
                                     <div class="col-12">
                                         <?php include "faces.php" ;?>
@@ -164,13 +190,13 @@ $properties = $result->getImagePropertiesAnnotation();
                                 </div>
                             </div>
 
-                            <!-- <div class="tab-pane fade show" id="pills-safesearch" role="tabpanel" aria-labelledby="pills-safesearch-tab">
+                            <div class="tab-pane fade show" id="pills-safesearch" role="tabpanel" aria-labelledby="pills-safesearch-tab">
                                 <div class="row">
                                     <div class="col-12">
-                                        <?php //include "safesearch.php" ;?>
+                                        <?php include "safesearch.php" ;?>
                                     </div>
                                 </div>
-                            </div> -->
+                            </div>
 
                             <div class="tab-pane fade show" id="pills-landmarks" role="tabpanel" aria-labelledby="pills-landmarks-tab">
                                 <div class="row">
@@ -193,34 +219,39 @@ $properties = $result->getImagePropertiesAnnotation();
             </div>
         </div>
     </div>
-</body>
-<footer>
-    <script language="javascript">
-        // function changeImage() {
-        //
-        //     if (document.getElementById("analysedImage").src == "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>") {
-        //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/object_image.php?token=$imagetoken";?>";
-        //     } else {
-        //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>";
-        //     }
-        // }
-        $('#pills-tab').children().each(function() {
-            $(this).on('click', function() {
-                // $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
-                var target = $(this).find('.nav-link').attr('href');
-                switch (target) {
-                    case '#pills-face':
-                        $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/image.php?token=$imagetoken";?>');
-                        break;
-                    case '#pills-object':
-                        $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
-                        break;
-                    default:
-                        $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/feed/" . $imagetoken . ".jpg";?>');
-                        break;
-                }
+    <footer>
+        <script language="javascript">
+            // function changeImage() {
+            //
+            //     if (document.getElementById("analysedImage").src == "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>") {
+            //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/object_image.php?token=$imagetoken";?>";
+            //     } else {
+            //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>";
+            //     }
+            // }
+
+            var tabPill = $('#pills-tab li:first-child a');
+            tabPill.attr('class', 'nav-link active');
+            $('#pills-tabContent').find(tabPill.attr('href')).attr('class', 'tab-pane fade show active');
+
+            $('#pills-tab').children().each(function() {
+                $(this).on('click', function() {
+                    // $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
+                    var target = $(this).find('.nav-link').attr('href');
+                    switch (target) {
+                        case '#pills-face':
+                            $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/image.php?token=$imagetoken";?>');
+                            break;
+                        case '#pills-object':
+                            $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
+                            break;
+                        default:
+                            $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/feed/" . $imagetoken . "." . $ext;?>');
+                            break;
+                    }
+                });
             });
-        });
-    </script>
-</footer>
+        </script>
+    </footer>
+</body>
 </html>
