@@ -6,6 +6,7 @@ require "vendor/autoload.php";
 
 
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\AnnotateImageResponse;
 use Google\Cloud\Vision\V1\Feature;
 use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
@@ -40,6 +41,15 @@ if ($result) {
     $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
     move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
     $_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
+    $fp = fopen('feed/' . $imagetoken . '.json', 'w');
+    fwrite($fp, $result->serializeToJsonString());
+    fclose($fp);
+
+    // $json = file_get_contents('feed/' . $imagetoken . '.json');
+    // $res = new AnnotateImageResponse();
+    // $$res->mergeFromJsonString($json);
+
+    // var_dump($res);
 } else {
     header("location: index.php");
     die();
@@ -95,11 +105,11 @@ $properties = $result->getImagePropertiesAnnotation();
                     <div class="col-md-4" style="text-align: center;">
                         <img class="img-thumbnail" src="<?php
                             if (sizeof($faces) > 0) {
-                                echo "http://localhost/vision/image.php?token=$imagetoken";
+                                echo "image.php?token=$imagetoken";
                             } else if (sizeof($objects) > 0) {
-                                echo "http://localhost/vision/object_image.php?token=$imagetoken";
+                                echo "object_image.php?token=$imagetoken";
                             } else {
-                                echo "http://localhost/vision/feed/" . $imagetoken . "." . $ext;
+                                echo "feed/" . $imagetoken . "." . $ext;
                             }
                         ?>" alt="Analysed Image" id="analysedImage" onclick="changeImage()">
 
@@ -221,32 +231,22 @@ $properties = $result->getImagePropertiesAnnotation();
     </div>
     <footer>
         <script language="javascript">
-            // function changeImage() {
-            //
-            //     if (document.getElementById("analysedImage").src == "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>") {
-            //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/object_image.php?token=$imagetoken";?>";
-            //     } else {
-            //         document.getElementById("analysedImage").src = "<?php //echo "http://localhost/vision/image.php?token=$imagetoken";?>";
-            //     }
-            // }
-
             var tabPill = $('#pills-tab li:first-child a');
             tabPill.attr('class', 'nav-link active');
             $('#pills-tabContent').find(tabPill.attr('href')).attr('class', 'tab-pane fade show active');
 
             $('#pills-tab').children().each(function() {
                 $(this).on('click', function() {
-                    // $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
                     var target = $(this).find('.nav-link').attr('href');
                     switch (target) {
                         case '#pills-face':
-                            $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/image.php?token=$imagetoken";?>');
+                            $('#analysedImage').attr('src', '<?php echo "image.php?token=$imagetoken";?>');
                             break;
                         case '#pills-object':
-                            $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/object_image.php?token=$imagetoken";?>');
+                            $('#analysedImage').attr('src', '<?php echo "object_image.php?token=$imagetoken";?>');
                             break;
                         default:
-                            $('#analysedImage').attr('src', '<?php echo "http://localhost/vision/feed/" . $imagetoken . "." . $ext;?>');
+                            $('#analysedImage').attr('src', '<?php echo "feed/" . $imagetoken . "." . $ext;?>');
                             break;
                     }
                 });

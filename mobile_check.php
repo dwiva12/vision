@@ -72,8 +72,9 @@ if ($labels != null) {
     }
 }
 
-$webData = [];
+$webData = null;
 if ($web != null) {
+    $webData = [];
     $webEntities = [];
     foreach ($web->getWebEntities() as $key => $entity) {
         $webEntities[$key] = [
@@ -121,16 +122,21 @@ if ($web != null) {
 
     $webData = [
         'webEntities' => $webEntities,
-        'fullMacthingImages' => $webFullMatchingImages,
-        'partialMatchingImages' => $webPartialMatchingImages,
-        'visuallySimilarImages' => $webVisuallySimilarImages,
-        'pages' => $webPagesWithMatchingImages,
+        // 'fullMatchingImages' => $webFullMatchingImages,
+        'fullMatchingImages' => [],
+        // 'partialMatchingImages' => $webPartialMatchingImages,
+        'partialMatchingImages' => [],
+        // 'visuallySimilarImages' => $webVisuallySimilarImages,
+        'visuallySimilarImages' => [],
+        // 'pages' => $webPagesWithMatchingImages,
+        'pages' => [],
         'bestGuessLabels' => $webBestGuessLabels
     ];
 }
 
-$textData = [];
+$textData = null;
 if ($textAnnotation != null) {
+    $textData = [];
     $textBlocks = [];
     foreach ($textAnnotation->getPages() as $key => $page) {
         $width = $page->getWidth();
