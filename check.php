@@ -15,7 +15,7 @@ use Google\Cloud\Vision\V1\Likelihood;
 putenv("GOOGLE_APPLICATION_CREDENTIALS=" . getcwd() . "/key1.json");
 $imageAnnotator = new ImageAnnotatorClient();
 
-$imageResource = fopen($_FILES['image']['tmp_name'], 'r');
+// $imageResource = fopen($_FILES['image']['tmp_name'], 'r');
 
 $features = [
     TYPE::OBJECT_LOCALIZATION,
@@ -29,25 +29,36 @@ $features = [
     // TYPE::TEXT_DETECTION
 ];
 
-$result = $imageAnnotator->annotateImage($imageResource, $features);
+// $result = $imageAnnotator->annotateImage($imageResource, $features);
+$result = new AnnotateImageResponse();
 
 if ($result) {
-    $imagetoken = random_int(1111111, 999999999);
+    // $imagetoken = random_int(1111111, 999999999);
+    // $imagetoken = 142190708;
+    $imagetoken = $_GET['token'];
     $imageType = [
         IMAGETYPE_JPEG => 'jpg',
         IMAGETYPE_PNG => 'png',
         IMAGETYPE_GIF => 'gif'
     ];
-    $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
-    move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
+    // $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
+    // move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
+    $ext = 'jpg';
     $_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
-    $fp = fopen('feed/' . $imagetoken . '.json', 'w');
-    fwrite($fp, $result->serializeToJsonString());
-    fclose($fp);
 
-    // $json = file_get_contents('feed/' . $imagetoken . '.json');
-    // $res = new AnnotateImageResponse();
-    // $$res->mergeFromJsonString($json);
+    // $fp = fopen('feed/' . $imagetoken . '.json', 'w');
+    // fwrite($fp, $result->serializeToJsonString());
+    // fclose($fp);
+
+    $json = file_get_contents('feed/' . $imagetoken . '.json');
+    // echo $json;
+    $res = new AnnotateImageResponse();
+    $res->mergeFromJsonString($json);
+    foreach ($res->getFaceAnnotations() as $key => $value) {
+        echo "posible \n";
+    };
+
+    $result = $res;
 
     // var_dump($res);
 } else {
