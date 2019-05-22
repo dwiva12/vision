@@ -1,5 +1,6 @@
 {
     "require": {
-        "google/cloud-vision": "^0.21.1"
+        "google/cloud-vision": "^0.21.1",
+        "claviska/simpleimage": "^3.3"
     }
 }

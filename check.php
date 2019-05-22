@@ -12,24 +12,6 @@ use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
 use Google\Cloud\Vision\V1\Likelihood;
 
-putenv("GOOGLE_APPLICATION_CREDENTIALS=" . getcwd() . "/key1.json");
-$imageAnnotator = new ImageAnnotatorClient();
-
-// $imageResource = fopen($_FILES['image']['tmp_name'], 'r');
-
-$features = [
-    TYPE::OBJECT_LOCALIZATION,
-    TYPE::LABEL_DETECTION,
-    TYPE::WEB_DETECTION,
-    TYPE::FACE_DETECTION,
-    TYPE::LANDMARK_DETECTION,
-    TYPE::LOGO_DETECTION,
-    TYPE::IMAGE_PROPERTIES,
-    TYPE::SAFE_SEARCH_DETECTION
-    // TYPE::TEXT_DETECTION
-];
-
-// $result = $imageAnnotator->annotateImage($imageResource, $features);
 $result = new AnnotateImageResponse();
 
 if ($result) {
@@ -46,18 +28,9 @@ if ($result) {
     $ext = 'jpg';
     $_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
 
-    // $fp = fopen('feed/' . $imagetoken . '.json', 'w');
-    // fwrite($fp, $result->serializeToJsonString());
-    // fclose($fp);
-
     $json = file_get_contents('feed/' . $imagetoken . '.json');
-    // echo $json;
     $res = new AnnotateImageResponse();
     $res->mergeFromJsonString($json);
-    foreach ($res->getFaceAnnotations() as $key => $value) {
-        echo "posible \n";
-    };
-
     $result = $res;
 
     // var_dump($res);
@@ -83,12 +56,14 @@ $properties = $result->getImagePropertiesAnnotation();
     <meta charset="UTF-8">
     <title>Medical Vision</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
     <style>
         body, html {
             height: 100%;
+            font-family: "Roboto", sans-serif; font-weight: 200; font-style: normal;
         }
         .bg {
             background-image: url("images/bg.jpg");
@@ -100,19 +75,21 @@ $properties = $result->getImagePropertiesAnnotation();
         .container-fluid  {
             margin-bottom: 50px;
         }
+        .w3-border{border:1px solid #888!important}
+        .w3-green,.w3-hover-green:hover{color:#fff!important;background-color:#4CAF50!important}
     </style>
 </head>
 <body class="bg">
     <div class="container-fluid" style="max-width: 1080px;">
         <br><br><br>
         <div class="row">
-            <div class="col-md-12" style="margin: auto; background: #c9d8d3; padding: 20px; box-shadow: 10px 10px 5px #888; border-radius: 5px;">
+            <div class="col-md-12" style="margin: auto; background: #c9d8d3; padding: 20px; box-shadow: 0px 10px 10px 5px #0004; border-radius: 5px;">
                 <div class="panel-heading">
                     <h2><a href="/">Medical Vision</a></h2>
-                    <p style="font-style: italic;">Image Analyse Result</p>
+                    <p style="font-style:normal; margin-bottom:20px;">Image Analyse Result</p>
                 </div>
                 <hr style="border: 1px solid grey;">
-                <div class="row">
+                <div class="row" style="padding: 20px;">
                     <div class="col-md-4" style="text-align: center;">
                         <img class="img-thumbnail" src="<?php
                             if (sizeof($faces) > 0) {

@@ -1,5 +1,9 @@
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<!-- <meta name="viewport" content="width=device-width, initial-scale=1"> -->
+<!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> -->
+<style>
+  .w3-border{border:1px solid #ccc!important}
+  .w3-green,.w3-hover-green:hover{color:#fff!important;background-color:#4CAF50!important}
+</style>
 <div class="row">
     <div class="col-12">
     <div class="w3-container">

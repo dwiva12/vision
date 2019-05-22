@@ -25,5 +25,5 @@ return array(
     'GPBMetadata\\Google\\Cloud\\Vision\\' => array($vendorDir . '/google/cloud-vision/metadata'),
     'GPBMetadata\\Google\\' => array($vendorDir . '/google/common-protos/metadata', $vendorDir . '/google/gax/metadata'),
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
-    '' => array($vendorDir . '/google/grpc-gcp/src/generated'),
+    '' => array($vendorDir . '/google/grpc-gcp/src/generated', $vendorDir . '/league/color-extractor/src'),
 );

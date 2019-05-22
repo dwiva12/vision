@@ -129,9 +129,17 @@ class ComposerStaticInitf51b20a0b9af398f8d79b5910396c8af
 
     public static $fallbackDirsPsr4 = array (
         0 => __DIR__ . '/..' . '/google/grpc-gcp/src/generated',
+        1 => __DIR__ . '/..' . '/league/color-extractor/src',
     );
 
     public static $prefixesPsr0 = array (
+        'c' => 
+        array (
+            'claviska' => 
+            array (
+                0 => __DIR__ . '/..' . '/claviska/simpleimage/src',
+            ),
+        ),
         'R' => 
         array (
             'Rize\\UriTemplate' => 

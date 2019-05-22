@@ -3,7 +3,7 @@
 session_start();
 
 require "vendor/autoload.php";
-
+require "database.php";
 
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\AnnotateImageResponse;
@@ -11,6 +11,8 @@ use Google\Cloud\Vision\V1\Feature;
 use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
 use Google\Cloud\Vision\V1\Likelihood;
+
+use claviska\SimpleImage;
 
 putenv("GOOGLE_APPLICATION_CREDENTIALS=" . getcwd() . "/key1.json");
 $imageAnnotator = new ImageAnnotatorClient();
@@ -46,22 +48,25 @@ if ($result) {
     fwrite($fp, $result->serializeToJsonString());
     fclose($fp);
 
-    // $json = file_get_contents('feed/' . $imagetoken . '.json');
-    // // echo $json;
-    // $res = new AnnotateImageResponse();
-    // $res->mergeFromJsonString($json);
-    // foreach ($res->getFaceAnnotations() as $key => $value) {
-    //     echo "posible \n";
-    // };
-    //
-    // $result = $res;
+    $image = new SimpleImage('feed/' . $imagetoken . "." . $ext);
+    $image->thumbnail(200, 200)->toFile('feed/' . $imagetoken . ".thumb." . $ext, null, 75);
 
-    // var_dump($res);
-    $response = [
-        'imagetoken' => $imagetoken
-    ];
+    $database = new Database();
+
     header('Content-Type: application/json');
-    echo json_encode($response);
+    if ($database->addAnnotatedImage($imagetoken)) {
+      $response = [
+        'success' => true,
+        'imagetoken' => $imagetoken
+      ];
+      echo json_encode($response);
+    } else {
+      $response = [
+        'success' => false,
+        'imagetoken' => $imagetoken
+      ];
+      echo json_encode($response);
+    }
 } else {
     header("location: index.php");
     die();
