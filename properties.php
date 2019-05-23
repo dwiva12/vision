@@ -11,7 +11,7 @@
                     ?>
                     <li>
                         <strong>
-                            <span style="color: rgb(<?php echo $rgb->getRed(); ?>, <?php echo $rgb->getGreen(); ?>, <?php echo $rgb->getBlue(); ?>);">
+                            <span style=" font-family: sans-serif; font-weight: bold; color: rgb(<?php echo $rgb->getRed(); ?>, <?php echo $rgb->getGreen(); ?>, <?php echo $rgb->getBlue(); ?>);">
                                 RGB:
                             </span>
                         </strong>

@@ -1,6 +1,6 @@
 <div class="row">
     <?php if ($web): ?>
-    <div class="col-6">
+    <div class="col-12 col-md-6">
         <h5>Best Guess Labels</h5>
         <hr style="border: 1px solid grey;">
         <ol>
@@ -17,7 +17,7 @@
             <?php endforeach ?>
         </ol>
     </div>
-    <div class="col-6">
+    <div class="col-12 col-md-6">
         <h5>Matched Images</h5>
         <hr style="border: 1px solid grey;">
         <ol>

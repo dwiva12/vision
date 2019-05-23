@@ -15,7 +15,8 @@
       font-family: "Roboto", sans-serif; font-weight: 200; font-style: normal;
     }
     .bg {
-      background-image: url("images/bg.jpg");
+      /* background-image: url("images/bg.jpg"); */
+      background-color: #CCCCCC;
       height: 100%;
       background-position: center;
       background-repeat: repeat; background-attachment: fixed;
@@ -25,6 +26,10 @@
       display: block;
       margin-left: auto;
       margin-right: auto;
+    }
+    .container {
+      height: 100%;
+      position: relative;
     }
     input[type=file] {
       width: 100%;
@@ -42,6 +47,14 @@
     .alert {
       display: none;
     }
+    .centern {
+      margin: 0;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      -ms-transform: translate(-50%, -50%);
+      transform: translate(-50%, -50%);
+    }
 
     /* .edit-photo-container {
       height: 400px;
@@ -58,16 +71,15 @@
 </head>
 <body class="bg">
   <div class="container">
-    <br><br><br>
     <div class="row">
-      <div class="col-md-4 offset-md-3" style="margin: 5px 100px 25px 10px; background: #dce5df; padding: 20px; box-shadow: 10px 10px 5px #0004; border-radius: 8px">
+      <div class="col-sm-10 col-md-4 centern" style="background: #dce5df; padding: 20px; box-shadow: 0px 5px 10px #0004; border-radius: 8px">
         <div class="panel-heading">
-          <h2><a href="/">Medical Vision</a></h2>
+          <h2><a style="color:#0FAD60;" href="/">Medical Vision</a></h2>
           <p style="font-style: bold;">For Medical Purpose</p>
         </div>
         <hr>
         <form id="fileUploadForm" method="post" enctype="multipart/form-data">
-          <label class="form-control" style="margin-bottom: 20px;">
+          <label class="form-control container" style="margin-bottom: 20px;">
             <span id="file-selected">Choose File</span>
             <input type="file" name="image" accept="image/*" onchange="loadFile(event)"/>
           </label>
@@ -77,7 +89,7 @@
           <div class="progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
           </div>
-          <button id="btnSubmit" width="50%" type="submit" style="border-radius: 0px;" class="btn btn-lg btn-outline-success center">Analyse Image</button>
+          <button id="btnSubmit" width="50%" type="submit" style="border-radius: 5px;" class="btn btn-lg btn-outline-success center">Analyse Image</button>
         </form>
       </div>
     </div>

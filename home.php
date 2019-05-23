@@ -37,12 +37,12 @@
       font-family: "Roboto", sans-serif; font-weight: 200; font-style: normal;"
     }
     .bg {
-      /* background-color: #DDDDDD; */
-      background-image: url("images/bg.jpg");
+      background-color: #CCCCCC;
+      /* background-image: url("images/bg.jpg"); */
       height: 100%;
-      /*background-position: center;*/
+      background-position: center;
       background-repeat: repeat; background-attachment: fixed;
-      /*background-size: cover;*/
+      background-size: cover;
     }
     .container  {
       /* margin-bottom: 50px;
@@ -109,12 +109,12 @@
         <div class="row">
         <?php foreach ($annotatedImages as $key => $image): ?>
         <div class="col-sm-6 col-md-4 col-lg-3">
-          <div style="background-color:white; margin-bottom: 40px; border-radius: 5px; padding-bottom:10px; box-shadow: 0px 5px 10px #0002;">
           <a href="/vision/check.php?token=<?php echo $image['token'];?>">
+          <div style="background-color:white; margin-bottom: 40px; border-radius: 5px; padding-bottom:10px; box-shadow: 0px 5px 10px #0002;">
             <img alt="picture" src="<?php echo "feed/" . $image['token'] . ".thumb.jpg";?>" style="width:100%; border-top-left-radius:5px;  border-top-right-radius: 5px;" />
-            <h4 class="text-center" style="margin-top:10px; margin-bottom:10px; color:black;"><?php echo $image['token'];?></h4>
-          </a>
+            <h4 class="text-center" style="margin-top:20px; margin-bottom:10px; color:black;"><?php echo $image['token'];?></h4>
           </div>
+          </a>
         </div>
         <?php endforeach ?>
       </div>

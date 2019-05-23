@@ -5,38 +5,25 @@ session_start();
 require "vendor/autoload.php";
 
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
+use Google\Cloud\Vision\V1\AnnotateImageResponse;
 use Google\Cloud\Vision\V1\Feature;
 use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
 
-putenv("GOOGLE_APPLICATION_CREDENTIALS=" . getcwd() . "/key1.json");
-$imageAnnotator = new ImageAnnotatorClient();
-
-$imageResource = fopen($_FILES['image']['tmp_name'], 'r');
-
-$features = [
-    TYPE::OBJECT_LOCALIZATION,
-    TYPE::LABEL_DETECTION,
-    TYPE::WEB_DETECTION,
-    TYPE::TEXT_DETECTION
+$imagetoken = $_GET['token'];
+$imageType = [
+    IMAGETYPE_JPEG => 'jpg',
+    IMAGETYPE_PNG => 'png',
+    IMAGETYPE_GIF => 'gif'
 ];
+// $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
+// move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
+$ext = 'jpg';
+$_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
 
-$result = $imageAnnotator->annotateImage($imageResource, $features);
-
-if ($result) {
-    $imagetoken = random_int(1111111, 999999999);
-    $imageType = [
-        IMAGETYPE_JPEG => 'jpg',
-        IMAGETYPE_PNG => 'png',
-        IMAGETYPE_GIF => 'gif'
-    ];
-    $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
-    move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
-    $_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
-} else {
-    header("location: index.php");
-    die();
-}
+$json = file_get_contents('feed/' . $imagetoken . '.json');
+$result = new AnnotateImageResponse();
+$result->mergeFromJsonString($json);
 
 $objects = $result->getLocalizedObjectAnnotations();
 $labels = $result->getLabelAnnotations();

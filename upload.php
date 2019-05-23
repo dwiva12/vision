@@ -27,8 +27,8 @@ $features = [
     TYPE::LANDMARK_DETECTION,
     TYPE::LOGO_DETECTION,
     TYPE::IMAGE_PROPERTIES,
-    TYPE::SAFE_SEARCH_DETECTION
-    // TYPE::TEXT_DETECTION
+    TYPE::SAFE_SEARCH_DETECTION,
+    TYPE::TEXT_DETECTION
 ];
 
 $result = $imageAnnotator->annotateImage($imageResource, $features);
