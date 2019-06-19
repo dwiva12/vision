@@ -1,5 +1,5 @@
 <?php
-
+require "database.php";
 session_start();
 
 $imageCreateFunc = [
@@ -11,8 +11,12 @@ $imageCreateFunc = [
 ];
 
 $imagetoken = $_GET['token'];
-$path = "feed/". $imagetoken . ".jpg";
-$ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+$database = new Database();
+$annotatedImage = $database->getAnnotatedImage($imagetoken);
+
+$ext = $annotatedImage['filetype'];
+$path = "feed/". $imagetoken . "." . $ext;
+
 $faces = json_decode(json_encode($_SESSION['faces'][$imagetoken]));
 // $image = imagecreatefromjpeg("feed/". $imagetoken . ".jpg");
 $image = call_user_func($imageCreateFunc[$ext], $path);

@@ -8,10 +8,11 @@ class Database {
   private $conn = null;
 
   public function __construct() {
-    $this->dbhost = 'localhost:3306';
-    $this->dbuser = 'root';
-    $this->dbpass = '';
-    $this->dbname = 'vision';
+    $config = include('config.php');
+    $this->dbhost = $config->db['host'] . ':' . $config->db['port'];
+    $this->dbuser = $config->db['username'];
+    $this->dbpass = $config->db['password'];
+    $this->dbname = $config->db['database'];
     $this->conn = mysqli_connect($this->dbhost, $this->dbuser, $this->dbpass, $this->dbname);
   }
 
@@ -33,16 +34,56 @@ class Database {
     return [$pageCount, $result->fetch_all(MYSQLI_ASSOC)];
   }
 
-  public function close() {
-    mysqli_close($conn);
-  }
-
-  public function addAnnotatedImage($token) {
+  public function getAnnotatedImage($token) {
     if (!$this->conn) {
         return 'null';
     }
 
-    $sql = "INSERT INTO `annotated_images`(`id`, `token`, `created_at`) VALUES (null, '" . $token ."', NOW())";
+    $sql = "SELECT * FROM annotated_images WHERE token = " . $token;
+    $result = mysqli_query($this->conn, $sql);
+    return $result->fetch_all(MYSQLI_ASSOC)[0];
+  }
+
+  public function close() {
+    mysqli_close($conn);
+  }
+
+  public function addImage($token, $ext) {
+    if (!$this->conn) {
+        return 'null';
+    }
+
+    $sql = "INSERT INTO `annotated_images`(`id`, `token`, `filetype`, `is_checked`, `created_at`) VALUES (null, '" . $token ."', '" . $ext ."', false, NOW())";
+    return mysqli_query($this->conn, $sql);
+    // $result = mysqli_query($this->conn, $sql);
+  }
+
+  public function addAnnotatedImage($token, $ext) {
+    if (!$this->conn) {
+        return 'null';
+    }
+
+    $sql = "INSERT INTO `annotated_images`(`id`, `token`, `filetype`, `is_checked`, `created_at`) VALUES (null, '" . $token ."', '" . $ext ."', true, NOW())";
+    return mysqli_query($this->conn, $sql);
+    // $result = mysqli_query($this->conn, $sql);
+  }
+
+  public function addUnannotatedImage($token, $ext) {
+    if (!$this->conn) {
+        return 'null';
+    }
+
+    $sql = "INSERT INTO `annotated_images`(`id`, `token`, `filetype`, `is_checked`, `created_at`) VALUES (null, '" . $token ."', '" . $ext ."', false, NOW())";
+    return mysqli_query($this->conn, $sql);
+    // $result = mysqli_query($this->conn, $sql);
+  }
+
+  public function updateAnnotatedImage($token) {
+    if (!$this->conn) {
+        return 'null';
+    }
+
+    $sql = "UPDATE annotated_images SET is_checked = 1, updated_at = now() WHERE token = '" . $token . "';";
     return mysqli_query($this->conn, $sql);
     // $result = mysqli_query($this->conn, $sql);
   }

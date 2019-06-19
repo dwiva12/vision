@@ -1,5 +1,6 @@
 <?php
-  require('database.php');
+  require "database.php";
+
   if (array_key_exists("page", $_GET)) {
     $page = $_GET['page'];
     if (!$page) {
@@ -29,6 +30,7 @@
   <title>Medical Vision</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css?family=Roboto:300" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
   <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
   <style>
@@ -67,6 +69,24 @@
       box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.45)
     }
 
+    .navbar .container .navbar-btn {
+      padding-top: 4px;
+      padding-left: 4px;
+      padding-right: 4px;
+      line-height: 1;
+      border-radius: 100px;
+    }
+
+    .navbar .container .navbar-btn:hover {
+      background-color: #FFF3;
+    }
+
+    .navbar .container a .material-icons{
+      font-size: 36px;
+      color: white;
+      text-align: center;
+    }
+
     .pagination li {
       color: white;
       float: left;
@@ -91,6 +111,11 @@
     .pagination li:hover:not(.active) {
       background-color: #ddd;
     }
+
+    .gallery-item div i {
+      background-color: #0FAD60;
+      color: white;
+    }
   </style>
 </head>
 <body class="bg">
@@ -100,6 +125,9 @@
         <h2><a style="color: white;" href="/vision">Medical Vision</a></h2>
         <h4 style="color: white; font-style:normal;">Image Catalog</h4>
       </div>
+      <a class="navbar-btn" href="index.php">
+        <i class="material-icons">add_photo_alternate</i>
+      </a>
     </div>
   </nav>
   <div class="container">
@@ -109,10 +137,13 @@
         <div class="row">
         <?php foreach ($annotatedImages as $key => $image): ?>
         <div class="col-sm-6 col-md-4 col-lg-3">
-          <a href="/vision/check.php?token=<?php echo $image['token'];?>">
-          <div style="background-color:white; margin-bottom: 40px; border-radius: 5px; padding-bottom:10px; box-shadow: 0px 5px 10px #0002;">
-            <img alt="picture" src="<?php echo "feed/" . $image['token'] . ".thumb.jpg";?>" style="width:100%; border-top-left-radius:5px;  border-top-right-radius: 5px;" />
-            <h4 class="text-center" style="margin-top:20px; margin-bottom:10px; color:black;"><?php echo $image['token'];?></h4>
+          <a class="gallery-item" href="/vision/check.php?token=<?php echo $image['token'];?>">
+          <div class="container" style="background-color:white; overflow: auto; margin-bottom: 40px; border-radius: 5px; padding: 0px; padding-bottom:10px; box-shadow: 0px 5px 10px #0002;">
+            <img alt="picture" src="<?php echo "feed/" . $image['token'] . ".thumb." . $image['filetype'];?>" style="width:100%; border-top-left-radius:5px;  border-top-right-radius: 5px;" />
+            <!-- <div> -->
+              <h4 class="text-center" style="margin-top:20px; margin-bottom:0px; color:black;"><?php echo $image['token'];?></h4>
+              <i class="material-icons"style="<?php if (!$image['is_checked']) echo 'background-color: white;';?> margin-right: 10px; padding: 2px; float: right; border-radius: 100px;">check</i>
+            <!-- </div> -->
           </div>
           </a>
         </div>

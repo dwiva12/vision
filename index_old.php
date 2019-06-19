@@ -45,6 +45,7 @@
                     <br>
                     <img id="output" width="300" class="center"/>
                     <br>
+                    <input type="checkbox" class="form-control" name="upload_only"/>
                     <script>
                         var loadFile = function(event) {
                         var output = document.getElementById('output');

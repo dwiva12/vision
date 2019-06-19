@@ -1,5 +1,5 @@
 <?php
-
+require "database.php";
 session_start();
 $imageCreateFunc = [
     'png' => 'imagecreatefrompng',
@@ -10,8 +10,11 @@ $imageCreateFunc = [
 ];
 
 $imagetoken = $_GET['token'];
-$path = $_SESSION['image_path'];
-$ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+$database = new Database();
+$annotatedImage = $database->getAnnotatedImage($imagetoken);
+
+$ext = $annotatedImage['filetype'];
+$path = "feed/". $imagetoken . "." . $ext;
 $objects = json_decode(json_encode($_SESSION['objects'][$imagetoken]));
 $image = call_user_func($imageCreateFunc[$ext], $path);
 list($width, $height) = getimagesize($path);
@@ -22,16 +25,6 @@ foreach ($objects as $key => $object) {
     $objectColorB = $_SESSION['objects']['colors'][$key][2];
 
     $vertices = json_decode($object);
-        // for ($i=0; $i < 5; $i++) {
-        //     for ($j=0; $j < 5; $j++) {
-        //         imagesetpixel($image, round($vertices->x), round($vertices->y), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertices->x - random_int(1, 5)) , round($vertices->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertices->x + random_int(1, 5)) , round($vertices->y + random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertices->x + random_int(1, 5)) , round($vertices->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertices->x - random_int(1, 5)) , round($vertices->y + random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //         imagesetpixel($image, round($vertices->x - random_int(1, 5)) , round($vertices->y - random_int(1, 5)), imagecolorallocate($image, $objectColorR, $objectColorG, $objectColorB));
-        //     }
-        // }
     imagesetthickness($image, round(0.004 * $width));
     imagerectangle($image,
         round($vertices->left * $width),

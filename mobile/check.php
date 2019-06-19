@@ -1,8 +1,9 @@
 <?php
-
+chdir('../');
 session_start();
 
 require "vendor/autoload.php";
+require "database.php";
 
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\AnnotateImageResponse;
@@ -11,15 +12,18 @@ use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
 
 $imagetoken = $_GET['token'];
-$imageType = [
-    IMAGETYPE_JPEG => 'jpg',
-    IMAGETYPE_PNG => 'png',
-    IMAGETYPE_GIF => 'gif'
-];
-// $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
-// move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
-$ext = 'jpg';
-$_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
+$database = new Database();
+$annotatedImage = $database->getAnnotatedImage($imagetoken);
+
+$ext = $annotatedImage['filetype'];
+if (!file_exists('feed/' . $imagetoken . '.' . $ext)) {
+  header("location: index.php");
+  die();
+}
+
+if (!file_exists('feed/' . $imagetoken . '.json')) {
+  include "reannotate_core.php" ;
+}
 
 $json = file_get_contents('feed/' . $imagetoken . '.json');
 $result = new AnnotateImageResponse();
@@ -109,12 +113,12 @@ if ($web != null) {
 
     $webData = [
         'webEntities' => $webEntities,
-        // 'fullMatchingImages' => $webFullMatchingImages,
-        'fullMatchingImages' => [],
-        // 'partialMatchingImages' => $webPartialMatchingImages,
-        'partialMatchingImages' => [],
-        // 'visuallySimilarImages' => $webVisuallySimilarImages,
-        'visuallySimilarImages' => [],
+        'fullMatchingImages' => $webFullMatchingImages,
+        // 'fullMatchingImages' => [],
+        'partialMatchingImages' => $webPartialMatchingImages,
+        // 'partialMatchingImages' => [],
+        'visuallySimilarImages' => $webVisuallySimilarImages,
+        // 'visuallySimilarImages' => [],
         // 'pages' => $webPagesWithMatchingImages,
         'pages' => [],
         'bestGuessLabels' => $webBestGuessLabels

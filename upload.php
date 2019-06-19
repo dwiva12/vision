@@ -4,6 +4,7 @@ session_start();
 
 require "vendor/autoload.php";
 require "database.php";
+include('config.php');
 
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\AnnotateImageResponse;
@@ -14,7 +15,39 @@ use Google\Cloud\Vision\V1\Likelihood;
 
 use claviska\SimpleImage;
 
-putenv("GOOGLE_APPLICATION_CREDENTIALS=" . getcwd() . "/key1.json");
+if (array_key_exists("upload_only", $_POST) && $_POST['upload_only']) {
+  $imagetoken = random_int(1111111, 999999999);
+  $imageType = [
+      IMAGETYPE_JPEG => 'jpg',
+      IMAGETYPE_PNG => 'png',
+      IMAGETYPE_GIF => 'gif'
+  ];
+  $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
+  move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
+
+  $image = new SimpleImage('feed/' . $imagetoken . "." . $ext);
+  $image->thumbnail(200, 200)->toFile('feed/' . $imagetoken . ".thumb." . $ext, null, 75);
+
+  $database = new Database();
+
+  header('Content-Type: application/json');
+  if ($database->addUnannotatedImage($imagetoken, $ext)) {
+    $response = [
+      'success' => true,
+      'imagetoken' => $imagetoken
+    ];
+    echo json_encode($response);
+  } else {
+    $response = [
+      'success' => false,
+      'imagetoken' => $imagetoken
+    ];
+    echo json_encode($response);
+  }
+
+  die();
+}
+
 $imageAnnotator = new ImageAnnotatorClient();
 
 $imageResource = fopen($_FILES['image']['tmp_name'], 'r');
@@ -54,7 +87,7 @@ if ($result) {
     $database = new Database();
 
     header('Content-Type: application/json');
-    if ($database->addAnnotatedImage($imagetoken)) {
+    if ($database->addAnnotatedImage($imagetoken, $ext)) {
       $response = [
         'success' => true,
         'imagetoken' => $imagetoken

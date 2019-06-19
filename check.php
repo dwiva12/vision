@@ -3,7 +3,7 @@
 session_start();
 
 require "vendor/autoload.php";
-
+require "database.php";
 
 use Google\Cloud\Vision\V1\ImageAnnotatorClient;
 use Google\Cloud\Vision\V1\AnnotateImageResponse;
@@ -12,32 +12,25 @@ use Google\Cloud\Vision\V1\Feature\Type;
 use Google\Cloud\Vision\V1\TextAnnotation\DetectedBreak\BreakType;
 use Google\Cloud\Vision\V1\Likelihood;
 
-$result = new AnnotateImageResponse();
+$imagetoken = $_GET['token'];
+$database = new Database();
+$annotatedImage = $database->getAnnotatedImage($imagetoken);
 
-if ($result) {
-    // $imagetoken = random_int(1111111, 999999999);
-    // $imagetoken = 142190708;
-    $imagetoken = $_GET['token'];
-    $imageType = [
-        IMAGETYPE_JPEG => 'jpg',
-        IMAGETYPE_PNG => 'png',
-        IMAGETYPE_GIF => 'gif'
-    ];
-    // $ext = $imageType[exif_imagetype($_FILES['image']['tmp_name'])];
-    // move_uploaded_file($_FILES['image']['tmp_name'], __DIR__ . '/feed/' . $imagetoken . "." . $ext);
-    $ext = 'jpg';
-    $_SESSION['image_path'] = 'feed/' . $imagetoken . "." . $ext;
-
-    $json = file_get_contents('feed/' . $imagetoken . '.json');
-    $res = new AnnotateImageResponse();
-    $res->mergeFromJsonString($json);
-    $result = $res;
-
-    // var_dump($res);
-} else {
-    header("location: index.php");
-    die();
+$ext = $annotatedImage['filetype'];
+if (!file_exists('feed/' . $imagetoken . '.' . $ext)) {
+  header("location: index.php");
+  die();
 }
+
+if (!file_exists('feed/' . $imagetoken . '.json')) {
+  include "reannotate_core.php" ;
+}
+
+$json = file_get_contents('feed/' . $imagetoken . '.json');
+$res = new AnnotateImageResponse();
+$res->mergeFromJsonString($json);
+$result = $res;
+
 
 $objects = $result->getLocalizedObjectAnnotations();
 $labels = $result->getLabelAnnotations();
@@ -96,6 +89,25 @@ $properties = $result->getImagePropertiesAnnotation();
           background-color: #0FAD60;
           box-shadow: 0 1px 15px 0 rgba(0, 0, 0, 0.45)
         }
+
+        .navbar .container .navbar-btn {
+          padding-top: 4px;
+          padding-left: 4px;
+          padding-right: 4px;
+          line-height: 1;
+          border-radius: 100px;
+        }
+
+        .navbar .container .navbar-btn:hover {
+          background-color: #FFF3;
+        }
+
+        .navbar .container a .material-icons{
+          font-size: 36px;
+          color: white;
+          text-align: center;
+        }
+
         .nav-item a p {
           margin: 0px;
         }
@@ -126,158 +138,166 @@ $properties = $result->getImagePropertiesAnnotation();
         <h2><a style="color: white;" href="/vision">Medical Vision</a></h2>
         <h4 style="color: white; font-style:normal;">Image Analyze Result</h4>
       </div>
+
+      <a class="navbar-btn" href="reannotate.php?token=<?php echo $imagetoken?>">
+        <i class="material-icons">refresh</i>
+      </a>
     </div>
   </nav>
   <div class="container" style="max-width: 1080px; min-height:100%;">
     <div class="row" style="padding: 20px;">
       <div class="col-md-4" style="text-align: center; margin-bottom:20px">
-                        <img style="width:100%; border-radius:5px; box-shadow: 0px 5px 10px #0002;" src="<?php
-                            if (sizeof($faces) > 0) {
-                                echo "image.php?token=$imagetoken";
-                            } else if (sizeof($objects) > 0) {
-                                echo "object_image.php?token=$imagetoken";
-                            } else {
-                                echo "feed/" . $imagetoken . "." . $ext;
-                            }
-                        ?>" alt="Analysed Image" id="analysedImage" onclick="changeImage()">
+        <div style="background-color: white; border-radius:5px; box-shadow: 0px 5px 10px #0002;">
+          <img style="width:100%; border-top-left-radius:5px;  border-top-right-radius: 5px;" src="<?php
+          if (sizeof($faces) > 0) {
+            echo "face_image.php?token=$imagetoken";
+          } else if (sizeof($objects) > 0) {
+            echo "object_image.php?token=$imagetoken";
+          } else {
+            echo "feed/" . $imagetoken . "." . $ext;
+          }
+          ?>" alt="Analysed Image" id="analysedImage" onclick="changeImage()"/>
+          <p style="padding:20px;">Last Updated:
+            <?php echo $annotatedImage['updated_at'] != null ? $annotatedImage['updated_at'] : $annotatedImage['created_at']; ?>
+          </p>
+        </div>
+      </div>
+      <div class="col-md-8" style="background-color:white; border-radius: 5px; padding:10px; box-shadow: 0px 5px 10px #0002;">
+        <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
+            <?php if (sizeof($faces) > 0): ?>
+            <li class="nav-item">
+                <a href="#pills-face" role="tab" class="nav-link" id="pills-face-tab" data-toggle="pill" aria-controls="pills-face" aria-selected="true">
+                  <i class="material-icons">face</i>
+                  <p>Face</p>
+                </a>
+            </li>
+            <?php endif ?>
+            <?php if (sizeof($objects) > 0): ?>
+            <li class="nav-item">
+              <a href="#pills-object" role="tab" class="nav-link" id="pills-object-tab" data-toggle="pill" aria-controls="pills-object" aria-selected="true">
+                <i class="material-icons">center_focus_strong</i>
+                <p>Object</p>
+              </a>
+            </li>
+            <?php endif ?>
+            <?php if (sizeof($labels) > 0): ?>
+            <li class="nav-item">
+                <a href="#pills-labels" role="tab" class="nav-link" id="pills-labels-tab" data-toggle="pill" aria-controls="pills-labels" aria-selected="true">
+                  <i class="material-icons">loyalty</i>
+                  <p>Labels</p>
+                </a>
+            </li>
+            <?php endif ?>
+            <?php if ($web): ?>
+            <li class="nav-item">
+                <a href="#pills-web" role="tab" class="nav-link" id="pills-web-tab" data-toggle="pill" aria-controls="pills-web" aria-selected="true">
+                  <i class="material-icons">public</i>
+                  <p>Web</p>
+                </a>
+            </li>
+            <?php endif ?>
+            <?php if ($properties): ?>
+            <li class="nav-item">
+                <a href="#pills-properties" role="tab" class="nav-link" id="pills-properties-tab" data-toggle="pill" aria-controls="pills-properties" aria-selected="true">
+                  <i class="material-icons">palette</i>
+                  <p>Properties</p>
+                </a>
+            </li>
+            <?php endif ?>
+            <?php if ($safeSearch): ?>
+            <li class="nav-item">
+                <a href="#pills-safesearch" role="tab" class="nav-link" id="pills-safesearch-tab" data-toggle="pill" aria-controls="pills-safesearch" aria-selected="true">
+                  <i class="material-icons">report</i>
+                  <p>Safe Search</p>
+                </a>
+            </li>
+            <?php endif ?>
+            <?php if (sizeof($landmarks) > 0): ?>
+            <li class="nav-item">
+                <a href="#pills-landmarks" role="tab" class="nav-link" id="pills-landmarks-tab" data-toggle="pill" aria-controls="pills-landmarks" aria-selected="true">
+                  <i class="material-icons">place</i>
+                  <p>Landmarks</p>
+                </a>
+            </li>
+            <?php endif ?>
+            <?php if (sizeof($logos) > 0): ?>
+            <li class="nav-item">
+                <a href="#pills-logo" role="tab" class="nav-link" id="pills-logo-tab" data-toggle="pill" aria-controls="pills-logo" aria-selected="true">
+                  <i class="material-icons">local_activity</i>
+                  <p>Logos</p>
+                </a>
+            </li>
+            <?php endif ?>
+        </ul>
+        <hr>
+        <div class="tab-content" id="pills-tabContent">
 
-                    </div>
-                    <div class="col-md-8" style="background-color:white; border-radius: 5px; padding:10px; box-shadow: 0px 5px 10px #0002;">
-                        <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
-                            <?php if (sizeof($faces) > 0): ?>
-                            <li class="nav-item">
-                                <a href="#pills-face" role="tab" class="nav-link" id="pills-face-tab" data-toggle="pill" aria-controls="pills-face" aria-selected="true">
-                                  <i class="material-icons">face</i>
-                                  <p>Face</p>
-                                </a>
-                            </li>
-                            <?php endif ?>
-                            <?php if (sizeof($objects) > 0): ?>
-                            <li class="nav-item">
-                              <a href="#pills-object" role="tab" class="nav-link" id="pills-object-tab" data-toggle="pill" aria-controls="pills-object" aria-selected="true">
-                                <i class="material-icons">center_focus_strong</i>
-                                <p>Object</p>
-                              </a>
-                            </li>
-                            <?php endif ?>
-                            <?php if (sizeof($labels) > 0): ?>
-                            <li class="nav-item">
-                                <a href="#pills-labels" role="tab" class="nav-link" id="pills-labels-tab" data-toggle="pill" aria-controls="pills-labels" aria-selected="true">
-                                  <i class="material-icons">loyalty</i>
-                                  <p>Labels</p>
-                                </a>
-                            </li>
-                            <?php endif ?>
-                            <?php if ($web): ?>
-                            <li class="nav-item">
-                                <a href="#pills-web" role="tab" class="nav-link" id="pills-web-tab" data-toggle="pill" aria-controls="pills-web" aria-selected="true">
-                                  <i class="material-icons">public</i>
-                                  <p>Web</p>
-                                </a>
-                            </li>
-                            <?php endif ?>
-                            <?php if ($properties): ?>
-                            <li class="nav-item">
-                                <a href="#pills-properties" role="tab" class="nav-link" id="pills-properties-tab" data-toggle="pill" aria-controls="pills-properties" aria-selected="true">
-                                  <i class="material-icons">palette</i>
-                                  <p>Properties</p>
-                                </a>
-                            </li>
-                            <?php endif ?>
-                            <?php if ($safeSearch): ?>
-                            <li class="nav-item">
-                                <a href="#pills-safesearch" role="tab" class="nav-link" id="pills-safesearch-tab" data-toggle="pill" aria-controls="pills-safesearch" aria-selected="true">
-                                  <i class="material-icons">report</i>
-                                  <p>Safe Search</p>
-                                </a>
-                            </li>
-                            <?php endif ?>
-                            <?php if (sizeof($landmarks) > 0): ?>
-                            <li class="nav-item">
-                                <a href="#pills-landmarks" role="tab" class="nav-link" id="pills-landmarks-tab" data-toggle="pill" aria-controls="pills-landmarks" aria-selected="true">
-                                  <i class="material-icons">place</i>
-                                  <p>Landmarks</p>
-                                </a>
-                            </li>
-                            <?php endif ?>
-                            <?php if (sizeof($logos) > 0): ?>
-                            <li class="nav-item">
-                                <a href="#pills-logo" role="tab" class="nav-link" id="pills-logo-tab" data-toggle="pill" aria-controls="pills-logo" aria-selected="true">
-                                  <i class="material-icons">local_activity</i>
-                                  <p>Logos</p>
-                                </a>
-                            </li>
-                            <?php endif ?>
-                        </ul>
-                        <hr>
-                        <div class="tab-content" id="pills-tabContent">
-
-                            <div class="tab-pane fade show" id="pills-face" role="tabpanel" aria-labelledby="pills-face-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "faces.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade show" id="pills-object" role="tabpanel" aria-labelledby="pills-object-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "objects.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade show" id="pills-labels" role="tabpanel" aria-labelledby="pills-labels-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "labels.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade show" id="pills-web" role="tabpanel" aria-labelledby="pills-web-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "web.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade show" id="pills-properties" role="tabpanel" aria-labelledby="pills-properties-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "properties.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade show" id="pills-safesearch" role="tabpanel" aria-labelledby="pills-safesearch-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "safesearch.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade show" id="pills-landmarks" role="tabpanel" aria-labelledby="pills-landmarks-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "landmarks.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="tab-pane fade show" id="pills-logo" role="tabpanel" aria-labelledby="pills-logo-tab">
-                                <div class="row">
-                                    <div class="col-12">
-                                        <?php include "logos.php" ;?>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="tab-pane fade show" id="pills-face" role="tabpanel" aria-labelledby="pills-face-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/faces.php" ;?>
                     </div>
                 </div>
+            </div>
+
+            <div class="tab-pane fade show" id="pills-object" role="tabpanel" aria-labelledby="pills-object-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/objects.php" ;?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="pills-labels" role="tabpanel" aria-labelledby="pills-labels-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/labels.php" ;?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="pills-web" role="tabpanel" aria-labelledby="pills-web-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/web.php" ;?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="pills-properties" role="tabpanel" aria-labelledby="pills-properties-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/properties.php" ;?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="pills-safesearch" role="tabpanel" aria-labelledby="pills-safesearch-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/safesearch.php" ;?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="pills-landmarks" role="tabpanel" aria-labelledby="pills-landmarks-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/landmarks.php" ;?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade show" id="pills-logo" role="tabpanel" aria-labelledby="pills-logo-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <?php include "check_tab/logos.php" ;?>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
     </div>
     <footer>
         <script language="javascript">
@@ -290,7 +310,7 @@ $properties = $result->getImagePropertiesAnnotation();
                     var target = $(this).find('.nav-link').attr('href');
                     switch (target) {
                         case '#pills-face':
-                            $('#analysedImage').attr('src', '<?php echo "image.php?token=$imagetoken";?>');
+                            $('#analysedImage').attr('src', '<?php echo "face_image.php?token=$imagetoken";?>');
                             break;
                         case '#pills-object':
                             $('#analysedImage').attr('src', '<?php echo "object_image.php?token=$imagetoken";?>');
